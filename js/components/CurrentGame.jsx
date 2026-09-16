@@ -1,0 +1,149 @@
+import { CheckIcon, ResetIcon, UndoIcon } from './Icons.jsx';
+import { ScoreboardTable } from './ScoreboardTable.jsx';
+import { formatValue } from '../utils/format.js';
+
+export const CurrentGame = ({
+    gameNumber,
+    players,
+    setPlayers,
+    setValue,
+    setSetValue,
+    isRankMode,
+    setIsRankMode,
+    rounds,
+    inputs,
+    setInputs,
+    editingIndex,
+    currentTotals,
+    currentCash,
+    currentSettlement,
+    onSaveOrUpdateRound,
+    onCancelEdit,
+    startEditingRound,
+    deleteRound,
+    onUndoLastRound,
+    onClearCurrentRounds,
+    onFinishCurrentGame,
+    onOpenSettingsModal
+}) => (
+    <>
+        <div className="page-heading">
+            <div>
+                <div className="eyebrow">Live game</div>
+                <h1 className="page-title">Game #{gameNumber}</h1>
+                <p className="page-note">{players.join(' · ')}</p>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+                <div className="eyebrow" style={{ marginBottom: 4 }}>Rounds</div>
+                <div style={{ fontSize: 22, fontWeight: 800, fontVariantNumeric: 'tabular-nums' }}>{rounds.length}</div>
+            </div>
+        </div>
+
+        <div className="game-grid">
+            <div className="panel entry-panel">
+                <div className="panel-header">
+                    <div>
+                        <div className="panel-title">{editingIndex !== null ? `Edit round #${editingIndex + 1}` : 'Enter round'}</div>
+                        <div className="panel-subtitle">Negative = points gained</div>
+                    </div>
+                    {editingIndex !== null && (
+                        <button className="btn btn-quiet" onClick={onCancelEdit}>Cancel</button>
+                    )}
+                </div>
+
+                <div className="settings-strip">
+                    <div className="panel-subtitle" style={{ marginBottom: 12, color: 'var(--soft)' }}>Game settings</div>
+
+                    {rounds.length === 0 ? (
+                        <>
+                            <div style={{ marginBottom: 12 }}>
+                                <div className="field-label">Scoring mode</div>
+                                <div className="segmented">
+                                    <button className={!isRankMode ? 'active' : ''} onClick={() => setIsRankMode(false)}>Classic</button>
+                                    <button className={isRankMode ? 'active' : ''} onClick={() => setIsRankMode(true)}>Top 2 / Bottom 2</button>
+                                </div>
+                            </div>
+                            <div>
+                                <div className="field-label">Value per point</div>
+                                <input className="number-input" type="number" min="0" value={setValue} onChange={e => setSetValue(Number(e.target.value))} />
+                            </div>
+                        </>
+                    ) : (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+                            <div>
+                                <div style={{ fontSize: 13, fontWeight: 750 }}>{isRankMode ? 'Top 2 / Bottom 2' : 'Classic'}</div>
+                                <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 3 }}>Rp{formatValue(setValue)} per point</div>
+                            </div>
+                            <button className="btn" onClick={onOpenSettingsModal}>Edit settings</button>
+                        </div>
+                    )}
+                </div>
+
+                <div className="players">
+                    {players.map((player, idx) => (
+                        <div className="player-block" key={idx}>
+                            <input
+                                className="player-name"
+                                value={player}
+                                onChange={e => setPlayers(prev => prev.map((p, i) => i === idx ? e.target.value : p))}
+                                disabled={editingIndex !== null}
+                                placeholder={`Player ${idx + 1}`}
+                            />
+                            <div className="score-entry">
+                                <div className="field-label">Points</div>
+                                <input
+                                    className="number-input"
+                                    type="number"
+                                    value={inputs[idx]}
+                                    onChange={e => setInputs(prev => prev.map((v, i) => i === idx ? e.target.value : v))}
+                                    placeholder="0"
+                                />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="actions">
+                    <button className="btn btn-primary" onClick={onSaveOrUpdateRound}>
+                        {editingIndex !== null ? 'Update round' : 'Save round'}
+                    </button>
+                </div>
+            </div>
+
+            <div className="panel">
+                <div className="panel-header">
+                    <div>
+                        <div className="panel-title">Scoreboard</div>
+                        <div className="panel-subtitle">{isRankMode ? 'Top 2 vs Bottom 2' : 'Classic'} · Rp{formatValue(setValue)} / point</div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                        <button className="btn" onClick={onUndoLastRound} disabled={!rounds.length || editingIndex !== null}><UndoIcon />&nbsp; Undo</button>
+                        <button className="btn" onClick={onClearCurrentRounds} disabled={!rounds.length}><ResetIcon />&nbsp; Clear</button>
+                    </div>
+                </div>
+
+                <ScoreboardTable
+                    roundsData={rounds}
+                    totalsData={currentTotals}
+                    cashData={currentCash}
+                    playersData={players}
+                    editingIndex={editingIndex}
+                    startEditingRound={startEditingRound}
+                    deleteRound={deleteRound}
+                    readOnly={false}
+                />
+
+                <div className="score-footer">
+                    <span>Cash shown is the net result for the current game.</span>
+                    <span>{rounds.length ? `${currentSettlement.length} settlement transfer${currentSettlement.length === 1 ? '' : 's'}` : 'No settlement yet'}</span>
+                </div>
+
+                <div style={{ padding: '0 20px 20px' }}>
+                    <button className="finish-btn" onClick={onFinishCurrentGame}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}><CheckIcon /> Finish game</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </>
+);
