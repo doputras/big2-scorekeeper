@@ -70,14 +70,6 @@ export const App = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    const deleteRound = (index) => {
-        const next = [...rounds];
-        next.splice(index, 1);
-        setRounds(next);
-        if (editingIndex === index) handleCancelEdit();
-        if (editingIndex !== null && editingIndex > index) setEditingIndex(editingIndex - 1);
-    };
-
     const undoLastRound = () => {
         if (!rounds.length) return;
         setConfirmDialog({
@@ -188,7 +180,7 @@ export const App = () => {
         <div className="app-shell">
             <header className="topbar">
                 <div className="container topbar-inner">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
+                    <div className="brand">
                         <div className="brand-mark">2+</div>
                         <div>
                             <div className="brand-title">Big 2 Tracker</div>
@@ -196,9 +188,9 @@ export const App = () => {
                         </div>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div className="topbar-actions">
                         {activeView !== 'game_result' && (
-                            <div className="nav-tabs">
+                            <nav className="nav-tabs" aria-label="Views">
                                 <button
                                     className={`nav-tab ${activeView === 'current' ? 'active' : ''}`}
                                     onClick={() => { setActiveView('current'); setViewingGame(null); }}
@@ -211,7 +203,7 @@ export const App = () => {
                                 >
                                     History {sessionGames.length ? `(${sessionGames.length})` : ''}
                                 </button>
-                            </div>
+                            </nav>
                         )}
                         <button className="btn btn-quiet" onClick={clearSession} title="Clear this session">Clear</button>
                     </div>
@@ -238,7 +230,6 @@ export const App = () => {
                         onSaveOrUpdateRound={handleSaveOrUpdateRound}
                         onCancelEdit={handleCancelEdit}
                         startEditingRound={startEditingRound}
-                        deleteRound={deleteRound}
                         onUndoLastRound={undoLastRound}
                         onClearCurrentRounds={clearCurrentRounds}
                         onFinishCurrentGame={finishCurrentGame}

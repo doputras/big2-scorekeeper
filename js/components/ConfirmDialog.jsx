@@ -8,7 +8,7 @@ export const ConfirmDialog = ({ confirmDialog, onCancel }) => {
                     <div className="panel-title">Confirm</div>
                 </div>
                 <div className="modal-body">
-                    <div style={{ color: 'var(--soft)', fontSize: 13, lineHeight: 1.6 }}>{confirmDialog.message}</div>
+                    <div className="modal-message">{confirmDialog.message}</div>
                 </div>
                 <div className="modal-footer">
                     <button className="btn" onClick={onCancel}>Cancel</button>

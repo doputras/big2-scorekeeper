@@ -10,9 +10,9 @@ export const HistoryList = ({ sessionGames, onViewGame }) => (
                 <h1 className="page-title">Game history</h1>
                 <p className="page-note">Each match keeps its own lineup, rules, and result.</p>
             </div>
-            <div style={{ textAlign: 'right' }}>
-                <div className="eyebrow" style={{ marginBottom: 4 }}>Played</div>
-                <div style={{ fontSize: 22, fontWeight: 800 }}>{sessionGames.length}</div>
+            <div className="heading-stat">
+                <div className="eyebrow">Played</div>
+                <div className="heading-stat-value">{sessionGames.length}</div>
             </div>
         </div>
 
@@ -42,8 +42,8 @@ export const HistoryList = ({ sessionGames, onViewGame }) => (
                                 <small>Winner</small>
                                 <strong>{winners.length ? winners.join(' & ') : 'Tie game'}</strong>
                             </div>
-                            <button className="btn" style={{ width: '100%' }} onClick={() => onViewGame(game)}>
-                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}><EyeIcon /> View details</span>
+                            <button className="btn btn-icon" onClick={() => onViewGame(game)}>
+                                <EyeIcon /> View details
                             </button>
                         </div>
                     );

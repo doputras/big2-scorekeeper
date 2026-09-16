@@ -1,5 +1,5 @@
-import { EditIcon, TrashIcon } from './Icons.jsx';
-import { formatValue } from '../utils/format.js';
+import { EditIcon } from './Icons.jsx';
+import { formatValue, cashClass } from '../utils/format.js';
 
 export const ScoreboardTable = ({
     roundsData,
@@ -8,7 +8,6 @@ export const ScoreboardTable = ({
     playersData,
     editingIndex,
     startEditingRound,
-    deleteRound,
     readOnly
 }) => (
     <div className="scoreboard-wrap">
@@ -16,22 +15,22 @@ export const ScoreboardTable = ({
             <thead>
                 <tr>
                     <th className="round-col">Round</th>
-                    {playersData.map((p, i) => <th key={i}>{p}</th>)}
-                    {!readOnly && <th aria-label="Actions"></th>}
+                    {playersData.map((p, i) => <th key={i} title={p}>{p}</th>)}
+                    {!readOnly && <th className="actions-col" aria-label="Actions"></th>}
                 </tr>
             </thead>
             <tbody>
                 {roundsData.length === 0 ? (
                     <tr>
-                        <td colSpan={readOnly ? 5 : 6}>
+                        <td colSpan={playersData.length + (readOnly ? 1 : 2)}>
                             <div className="empty-state" style={{ border: 0 }}>
                                 <strong>No rounds yet</strong>
-                                Enter the first score on the left.
+                                Save a round to start scoring.
                             </div>
                         </td>
                     </tr>
                 ) : roundsData.map((round, rIndex) => (
-                    <tr key={rIndex} style={editingIndex === rIndex ? { background: '#211f1b' } : undefined}>
+                    <tr key={rIndex} className={editingIndex === rIndex ? 'row-editing' : undefined}>
                         <td className="round-col">#{rIndex + 1}</td>
                         {round.scores.map((score, sIndex) => (
                             <td key={sIndex} className={score < 0 ? 'negative' : score > 0 ? 'positive' : ''}>
@@ -39,10 +38,9 @@ export const ScoreboardTable = ({
                             </td>
                         ))}
                         {!readOnly && (
-                            <td>
-                                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4 }}>
-                                    <button className="icon-btn" onClick={() => startEditingRound(rIndex)} title="Edit round"><EditIcon /></button>
-                                    <button className="icon-btn" onClick={() => deleteRound(rIndex)} title="Delete round"><TrashIcon /></button>
+                            <td className="actions-col">
+                                <div className="actions-cell">
+                                    <button className="icon-btn" onClick={() => startEditingRound(rIndex)} title="Edit round" aria-label={`Edit round ${rIndex + 1}`}><EditIcon /></button>
                                 </div>
                             </td>
                         )}
@@ -57,14 +55,14 @@ export const ScoreboardTable = ({
                             {score > 0 ? '+' : ''}{score}
                         </td>
                     ))}
-                    {!readOnly && <td></td>}
+                    {!readOnly && <td className="actions-col"></td>}
                 </tr>
                 <tr className="cash-row">
                     <td className="round-col">Cash</td>
                     {cashData.map((value, i) => (
-                        <td key={i}>{value > 0 ? '+' : ''}{formatValue(value)}</td>
+                        <td key={i} className={cashClass(value)}>{value > 0 ? '+' : ''}{formatValue(value)}</td>
                     ))}
-                    {!readOnly && <td></td>}
+                    {!readOnly && <td className="actions-col"></td>}
                 </tr>
             </tfoot>
         </table>

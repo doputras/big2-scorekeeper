@@ -8,14 +8,14 @@ export const HistoryDetail = ({ viewingGame, onBack }) => {
 
     return (
         <div className="history-detail">
-            <button className="back-link" onClick={onBack}>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}><BackIcon /> Back</span>
+            <button className="back-link btn-icon" onClick={onBack}>
+                <BackIcon /> Back
             </button>
 
             <div className="panel">
                 <div className="panel-header">
                     <div>
-                        <div className="eyebrow" style={{ marginBottom: 5 }}>Archived match</div>
+                        <div className="eyebrow">Archived match</div>
                         <div className="panel-title" style={{ fontSize: 20 }}>Game #{viewingGame.gameNumber}</div>
                         <div className="panel-subtitle">{viewingGame.players.join(' · ')} · finished {viewingGame.finishedAt}</div>
                     </div>

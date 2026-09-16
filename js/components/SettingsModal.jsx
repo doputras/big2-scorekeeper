@@ -11,7 +11,7 @@ export const SettingsModal = ({ settingsModal, setSettingsModal, onApply }) => {
                     <div className="modal-warning">
                         This changes the rules used to calculate the entire current game. The score values in each round stay the same.
                     </div>
-                    <div style={{ display: 'grid', gap: 16 }}>
+                    <div className="modal-fields">
                         <div>
                             <div className="field-label">Scoring mode</div>
                             <div className="segmented">

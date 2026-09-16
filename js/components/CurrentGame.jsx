@@ -20,7 +20,6 @@ export const CurrentGame = ({
     onSaveOrUpdateRound,
     onCancelEdit,
     startEditingRound,
-    deleteRound,
     onUndoLastRound,
     onClearCurrentRounds,
     onFinishCurrentGame,
@@ -33,9 +32,9 @@ export const CurrentGame = ({
                 <h1 className="page-title">Game #{gameNumber}</h1>
                 <p className="page-note">{players.join(' · ')}</p>
             </div>
-            <div style={{ textAlign: 'right' }}>
-                <div className="eyebrow" style={{ marginBottom: 4 }}>Rounds</div>
-                <div style={{ fontSize: 22, fontWeight: 800, fontVariantNumeric: 'tabular-nums' }}>{rounds.length}</div>
+            <div className="heading-stat">
+                <div className="eyebrow">Rounds</div>
+                <div className="heading-stat-value">{rounds.length}</div>
             </div>
         </div>
 
@@ -52,27 +51,27 @@ export const CurrentGame = ({
                 </div>
 
                 <div className="settings-strip">
-                    <div className="panel-subtitle" style={{ marginBottom: 12, color: 'var(--soft)' }}>Game settings</div>
+                    <div className="settings-heading">Game settings</div>
 
                     {rounds.length === 0 ? (
                         <>
-                            <div style={{ marginBottom: 12 }}>
+                            <div className="field">
                                 <div className="field-label">Scoring mode</div>
                                 <div className="segmented">
                                     <button className={!isRankMode ? 'active' : ''} onClick={() => setIsRankMode(false)}>Classic</button>
                                     <button className={isRankMode ? 'active' : ''} onClick={() => setIsRankMode(true)}>Top 2 / Bottom 2</button>
                                 </div>
                             </div>
-                            <div>
+                            <div className="field">
                                 <div className="field-label">Value per point</div>
-                                <input className="number-input" type="number" min="0" value={setValue} onChange={e => setSetValue(Number(e.target.value))} />
+                                <input className="number-input" type="number" min="0" inputMode="numeric" value={setValue} onChange={e => setSetValue(Number(e.target.value))} />
                             </div>
                         </>
                     ) : (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+                        <div className="settings-current">
                             <div>
-                                <div style={{ fontSize: 13, fontWeight: 750 }}>{isRankMode ? 'Top 2 / Bottom 2' : 'Classic'}</div>
-                                <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 3 }}>Rp{formatValue(setValue)} per point</div>
+                                <div className="settings-current-mode">{isRankMode ? 'Top 2 / Bottom 2' : 'Classic'}</div>
+                                <div className="settings-current-note">Rp{formatValue(setValue)} per point</div>
                             </div>
                             <button className="btn" onClick={onOpenSettingsModal}>Edit settings</button>
                         </div>
@@ -116,9 +115,9 @@ export const CurrentGame = ({
                         <div className="panel-title">Scoreboard</div>
                         <div className="panel-subtitle">{isRankMode ? 'Top 2 vs Bottom 2' : 'Classic'} · Rp{formatValue(setValue)} / point</div>
                     </div>
-                    <div style={{ display: 'flex', gap: 6 }}>
-                        <button className="btn" onClick={onUndoLastRound} disabled={!rounds.length || editingIndex !== null}><UndoIcon />&nbsp; Undo</button>
-                        <button className="btn" onClick={onClearCurrentRounds} disabled={!rounds.length}><ResetIcon />&nbsp; Clear</button>
+                    <div className="panel-header-actions">
+                        <button className="btn btn-icon" onClick={onUndoLastRound} disabled={!rounds.length || editingIndex !== null}><UndoIcon /> Undo</button>
+                        <button className="btn btn-icon" onClick={onClearCurrentRounds} disabled={!rounds.length}><ResetIcon /> Clear</button>
                     </div>
                 </div>
 
@@ -129,7 +128,6 @@ export const CurrentGame = ({
                     playersData={players}
                     editingIndex={editingIndex}
                     startEditingRound={startEditingRound}
-                    deleteRound={deleteRound}
                     readOnly={false}
                 />
 
@@ -138,9 +136,9 @@ export const CurrentGame = ({
                     <span>{rounds.length ? `${currentSettlement.length} settlement transfer${currentSettlement.length === 1 ? '' : 's'}` : 'No settlement yet'}</span>
                 </div>
 
-                <div style={{ padding: '0 20px 20px' }}>
+                <div className="panel-foot">
                     <button className="finish-btn" onClick={onFinishCurrentGame}>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}><CheckIcon /> Finish game</span>
+                        <CheckIcon /> Finish game
                     </button>
                 </div>
             </div>

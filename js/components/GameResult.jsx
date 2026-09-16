@@ -1,5 +1,5 @@
 import { getWinner } from '../utils/calculations.js';
-import { formatValue } from '../utils/format.js';
+import { formatValue, cashClass } from '../utils/format.js';
 import { SettlementList } from './SettlementList.jsx';
 
 export const GameResult = ({ finishedGame, onStartNextGame, onViewHistory }) => {
@@ -26,7 +26,7 @@ export const GameResult = ({ finishedGame, onStartNextGame, onViewHistory }) => 
                 {finishedGame.players.map((p, i) => (
                     <div className="result-player" key={i}>
                         <div className="result-player-name">{p}</div>
-                        <div className={`result-money ${finishedGame.cash[i] > 0 ? 'positive' : finishedGame.cash[i] < 0 ? 'negative' : ''}`}>
+                        <div className={`result-money ${cashClass(finishedGame.cash[i])}`}>
                             {finishedGame.cash[i] > 0 ? '+' : ''}{formatValue(finishedGame.cash[i])}
                         </div>
                         <div className="result-points">{finishedGame.totals[i]} pts</div>
