@@ -1,16 +1,16 @@
+import { Modal } from './Modal.jsx';
+
 export const ConfirmDialog = ({ confirmDialog, onCancel }) => {
     if (!confirmDialog.isOpen) return null;
 
     return (
-        <div className="modal-backdrop">
-            <div className="modal">
-                <div className="modal-header">
-                    <div className="panel-title">Confirm</div>
-                </div>
-                <div className="modal-body">
-                    <div className="modal-message">{confirmDialog.message}</div>
-                </div>
-                <div className="modal-footer">
+        <Modal
+            title="Confirm"
+            onClose={onCancel}
+            footer={
+                <>
+                    {/* showModal() focuses the first control, so Cancel is what a
+                        stray Enter hits -- deliberate for a destructive confirm. */}
                     <button className="btn" onClick={onCancel}>Cancel</button>
                     <button
                         className={`btn ${confirmDialog.style === 'gold' ? 'btn-primary' : ''}`}
@@ -18,8 +18,10 @@ export const ConfirmDialog = ({ confirmDialog, onCancel }) => {
                     >
                         {confirmDialog.confirmText}
                     </button>
-                </div>
-            </div>
-        </div>
+                </>
+            }
+        >
+            <div className="modal-message">{confirmDialog.message}</div>
+        </Modal>
     );
 };

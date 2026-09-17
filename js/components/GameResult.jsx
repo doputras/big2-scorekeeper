@@ -1,5 +1,5 @@
 import { getWinner } from '../utils/calculations.js';
-import { formatValue, cashClass } from '../utils/format.js';
+import { cashClass, formatTime, signedCash } from '../utils/format.js';
 import { SettlementList } from './SettlementList.jsx';
 
 export const GameResult = ({ finishedGame, onStartNextGame, onViewHistory }) => {
@@ -13,7 +13,7 @@ export const GameResult = ({ finishedGame, onStartNextGame, onViewHistory }) => 
                 <div className="result-game">Game #{finishedGame.gameNumber}</div>
                 <div className="result-title">Finished</div>
                 <div className="result-sub">
-                    {finishedGame.players.join(' · ')} · {finishedGame.finishedAt}
+                    {finishedGame.players.join(' · ')} · {formatTime(finishedGame.finishedAt)}
                 </div>
             </div>
 
@@ -27,7 +27,7 @@ export const GameResult = ({ finishedGame, onStartNextGame, onViewHistory }) => 
                     <div className="result-player" key={i}>
                         <div className="result-player-name">{p}</div>
                         <div className={`result-money ${cashClass(finishedGame.cash[i])}`}>
-                            {finishedGame.cash[i] > 0 ? '+' : ''}{formatValue(finishedGame.cash[i])}
+                            {signedCash(finishedGame.cash[i])}
                         </div>
                         <div className="result-points">{finishedGame.totals[i]} pts</div>
                     </div>

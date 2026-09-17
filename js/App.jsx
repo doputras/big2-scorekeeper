@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
-import { calculateTotals, calculateCash, calculateSettlement } from './utils/calculations.js';
-import { DEFAULT_PLAYERS, getInitialSession, persistSession, STORAGE_KEY } from './utils/session.js';
+import { calculateTotals, calculateCash, calculateSettlement, getBoundaryTie } from './utils/calculations.js';
+import { clampSetValue, DEFAULT_PLAYERS, getInitialSession, persistSession } from './utils/session.js';
+import { formatList } from './utils/format.js';
 import { ConfirmDialog } from './components/ConfirmDialog.jsx';
 import { SettingsModal } from './components/SettingsModal.jsx';
 import { CurrentGame } from './components/CurrentGame.jsx';
@@ -41,6 +42,12 @@ export const App = () => {
     const currentCash = useMemo(() => calculateCash(currentTotals, isRankMode, setValue), [currentTotals, isRankMode, setValue]);
     const currentSettlement = useMemo(() => calculateSettlement(currentCash, players), [currentCash, players]);
 
+    // Only rank mode draws a top2/bottom2 line, so only rank mode can tie across it.
+    const boundaryTie = useMemo(
+        () => (isRankMode && rounds.length ? getBoundaryTie(currentTotals, players) : null),
+        [isRankMode, rounds.length, currentTotals, players]
+    );
+
     const handleCancelEdit = () => {
         setEditingIndex(null);
         setInputs(['', '', '', '']);
@@ -78,7 +85,6 @@ export const App = () => {
             confirmText: 'Undo Round',
             action: () => {
                 setRounds(rounds.slice(0, -1));
-                if (editingIndex === rounds.length - 1) handleCancelEdit();
                 setConfirmDialog({ isOpen: false, action: null, message: '' });
             }
         });
@@ -107,14 +113,18 @@ export const App = () => {
             setErrorMsg('Save or cancel the round edit before finishing.');
             return;
         }
+        if (boundaryTie) {
+            setErrorMsg(`${formatList(boundaryTie.players)} are tied on ${boundaryTie.points} points across the Top 2 / Bottom 2 line. Play a tiebreak round, or switch to Classic in settings.`);
+            return;
+        }
 
         setConfirmDialog({
             isOpen: true, style: 'gold',
-            message: 'Finish this game and save the result to session history?',
+            message: 'Finish this game and save the result to history?',
             confirmText: 'Finish Game',
             action: () => {
                 const completedGame = {
-                    id: `${Date.now()}`,
+                    id: crypto.randomUUID(),
                     gameNumber,
                     players: [...players],
                     setValue,
@@ -123,11 +133,14 @@ export const App = () => {
                     totals: [...currentTotals],
                     cash: [...currentCash],
                     settlement: [...currentSettlement],
-                    finishedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    finishedAt: Date.now()
                 };
 
                 setSessionGames(prev => [...prev, completedGame]);
                 setFinishedGame(completedGame);
+                // Counted here, not in startNextGame: leaving the result screen through
+                // View history used to skip it and reuse the number on the next game.
+                setGameNumber(prev => prev + 1);
                 setRounds([]);
                 setInputs(['', '', '', '']);
                 setEditingIndex(null);
@@ -138,7 +151,6 @@ export const App = () => {
     };
 
     const startNextGame = () => {
-        setGameNumber(prev => prev + 1);
         setRounds([]);
         setInputs(['', '', '', '']);
         setEditingIndex(null);
@@ -147,13 +159,14 @@ export const App = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    // The persist effect rewrites storage right after this, so resetting state to
+    // the defaults is what actually clears the saved games.
     const clearSession = () => {
         setConfirmDialog({
             isOpen: true, style: 'red',
-            message: 'Clear the current game and every completed game from this browser session?',
-            confirmText: 'Clear Session',
+            message: 'Clear the current game and every game saved on this device?',
+            confirmText: 'Clear All',
             action: () => {
-                sessionStorage.removeItem(STORAGE_KEY);
                 setGameNumber(1);
                 setPlayers([...DEFAULT_PLAYERS]);
                 setSetValue(1000);
@@ -172,7 +185,7 @@ export const App = () => {
 
     const applyGameSettings = () => {
         setIsRankMode(settingsModal.tempMode);
-        setSetValue(settingsModal.tempValue);
+        setSetValue(clampSetValue(settingsModal.tempValue));
         setSettingsModal({ isOpen: false, tempMode: false, tempValue: 0 });
     };
 
@@ -205,12 +218,13 @@ export const App = () => {
                                 </button>
                             </nav>
                         )}
-                        <button className="btn btn-quiet" onClick={clearSession} title="Clear this session">Clear</button>
+                        <button className="btn btn-quiet" onClick={clearSession} title="Clear all saved games">Clear</button>
                     </div>
                 </div>
             </header>
 
-            <main className="container page">
+            {/* The tab bar is hidden on the result screen, so stop reserving its height. */}
+            <main className={`container page ${activeView === 'game_result' ? 'no-tabs' : ''}`}>
                 {activeView === 'current' && (
                     <CurrentGame
                         gameNumber={gameNumber}
@@ -227,6 +241,7 @@ export const App = () => {
                         currentTotals={currentTotals}
                         currentCash={currentCash}
                         currentSettlement={currentSettlement}
+                        boundaryTie={boundaryTie}
                         onSaveOrUpdateRound={handleSaveOrUpdateRound}
                         onCancelEdit={handleCancelEdit}
                         startEditingRound={startEditingRound}
@@ -252,12 +267,12 @@ export const App = () => {
                 {activeView === 'history_detail' && (
                     <HistoryDetail
                         viewingGame={viewingGame}
-                        onBack={() => { setViewingGame(null); setActiveView(finishedGame ? 'game_result' : 'history_list'); }}
+                        onBack={() => { setViewingGame(null); setActiveView('history_list'); }}
                     />
                 )}
             </main>
 
-            {errorMsg && <div className="toast">{errorMsg}</div>}
+            {errorMsg && <div className="toast" role="alert">{errorMsg}</div>}
 
             <SettingsModal
                 settingsModal={settingsModal}

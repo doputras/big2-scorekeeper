@@ -22,8 +22,24 @@ export const calculateCash = (totals, isRankMode, setValue) => {
             const isTop2 = top2.some(p => p.idx === i);
             cashMultiplier = isTop2 ? bottomSum - (2 * score) : topSum - (2 * score);
         }
-        return cashMultiplier * setValue;
+        // A negative multiplier times a zero setValue gives -0, which formats as
+        // the string "-0" in a money column. Normalise it away at the source.
+        const cash = cashMultiplier * setValue;
+        return cash === 0 ? 0 : cash;
     });
+};
+
+// Rank mode pays the two lowest point totals out of the two highest. When 2nd
+// and 3rd place are level there is no non-arbitrary way to draw that line --
+// the sort is stable, so seat order would silently decide who collects and who
+// pays. Surface it instead and let the table resolve it.
+export const getBoundaryTie = (totals, players) => {
+    const sorted = [...totals].sort((a, b) => a - b);
+    if (sorted[1] !== sorted[2]) return null;
+    return {
+        points: sorted[1],
+        players: players.filter((_, i) => totals[i] === sorted[1])
+    };
 };
 
 export const calculateSettlement = (cashArray, playersArray) => {
@@ -63,6 +79,7 @@ export const calculateSettlement = (cashArray, playersArray) => {
 
 export const getWinner = (game) => {
     const maxCash = Math.max(...game.cash);
+    // Cash always sums to zero, so a non-positive top earner means everyone is level.
     if (maxCash <= 0) return [];
     return game.players.filter((p, i) => game.cash[i] === maxCash);
 };

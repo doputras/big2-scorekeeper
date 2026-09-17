@@ -24,6 +24,7 @@
   --safe-r: env(safe-area-inset-right, 0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
   --navbar-h: 0px;
+  --topbar-h: 72px;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -96,7 +97,7 @@ input::placeholder { color: #6f746d; }
 }
 
 .topbar-inner {
-  min-height: 72px;
+  min-height: var(--topbar-h);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -256,7 +257,7 @@ input::placeholder { color: #6f746d; }
 
 .entry-panel {
   position: sticky;
-  top: 92px;
+  top: calc(var(--topbar-h) + 20px);
 }
 
 /* ---------- form controls ---------- */
@@ -793,24 +794,24 @@ input::placeholder { color: #6f746d; }
 
 /* ---------- modal ---------- */
 
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, .72);
-  z-index: 50;
-  display: grid;
-  place-items: center;
-  padding: 16px;
-  padding-bottom: max(16px, var(--safe-b));
-}
+/* ponytail: <dialog> in the top layer -- no z-index race, no backdrop div. */
+.modal::backdrop { background: rgba(0, 0, 0, .72); }
 
 .modal {
   width: min(460px, 100%);
-  max-height: calc(100dvh - 32px);
+  max-width: calc(100vw - 32px);
+  max-height: calc(100dvh - 32px - var(--safe-b));
+  margin: auto;
+  padding: 0;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--line);
+}
+
+/* the UA sheet hides a closed dialog with display:none, so open-state only. */
+.modal[open] {
   display: flex;
   flex-direction: column;
-  background: var(--panel);
-  border: 1px solid var(--line);
 }
 
 .modal-header { padding: 18px 20px; border-bottom: 1px solid var(--line); flex-shrink: 0; }
@@ -856,6 +857,38 @@ input::placeholder { color: #6f746d; }
   box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
 }
 
+/* ---------- tie warning ---------- */
+
+/* Full-bleed like its panel siblings, tinted in the modal-warning register so a
+   blocked Finish reads as "resolve this", not as an error. */
+.tie-warning {
+  padding: 13px 20px;
+  border-top: 1px solid var(--line);
+  background: #211e16;
+  color: #cbbf9f;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.tie-warning strong { display: block; color: var(--accent-strong); margin-bottom: 4px; }
+
+/* A boundary tie makes the cash split a coin flip, so it must not sit next to
+   the warning looking as settled as every other number on the board. */
+.cash-provisional .cash-row td { opacity: .45; }
+
+/* ---------- crash ---------- */
+
+.crash {
+  max-width: 460px;
+  margin: 15dvh auto;
+  padding: 24px var(--gutter);
+  text-align: center;
+}
+
+.crash strong { display: block; font-size: 18px; margin-bottom: 10px; }
+.crash p { color: var(--muted); font-size: 13px; line-height: 1.6; margin-bottom: 20px; }
+.crash-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+
 /* ---------- responsive ---------- */
 
 @media (max-width: 900px) {
@@ -864,7 +897,7 @@ input::placeholder { color: #6f746d; }
 }
 
 @media (max-width: 640px) {
-  :root { --navbar-h: 54px; }
+  :root { --navbar-h: 54px; --topbar-h: 60px; }
 
   .brand-subtitle { display: none; }
 
@@ -872,7 +905,7 @@ input::placeholder { color: #6f746d; }
      descendants, which would pin the tab bar to the header instead of the viewport.
      At 92% opacity over a near-identical background the blur buys nothing here. */
   .topbar {
-    min-height: 60px;
+    min-height: var(--topbar-h);
     backdrop-filter: none;
     background: var(--bg);
   }
@@ -902,6 +935,7 @@ input::placeholder { color: #6f746d; }
   }
 
   .page { padding-block: 20px calc(28px + var(--navbar-h) + var(--safe-b)); }
+  .page.no-tabs { --navbar-h: 0px; }
   .page-heading { flex-direction: column; align-items: stretch; gap: 12px; margin-bottom: 18px; }
 
   /* stacked, the stat reads as a second headline; inline it stays a caption. */
@@ -915,6 +949,7 @@ input::placeholder { color: #6f746d; }
   .actions,
   .score-footer,
   .settlement,
+  .tie-warning,
   .result-head,
   .result-winner,
   .result-actions,

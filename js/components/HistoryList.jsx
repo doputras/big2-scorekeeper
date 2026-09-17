@@ -1,12 +1,12 @@
 import { getWinner } from '../utils/calculations.js';
-import { formatValue } from '../utils/format.js';
+import { formatTime, formatValue } from '../utils/format.js';
 import { EyeIcon } from './Icons.jsx';
 
 export const HistoryList = ({ sessionGames, onViewGame }) => (
     <>
         <div className="page-heading">
             <div>
-                <div className="eyebrow">This browser session</div>
+                <div className="eyebrow">Saved on this device</div>
                 <h1 className="page-title">Game history</h1>
                 <p className="page-note">Each match keeps its own lineup, rules, and result.</p>
             </div>
@@ -19,7 +19,7 @@ export const HistoryList = ({ sessionGames, onViewGame }) => (
         {sessionGames.length === 0 ? (
             <div className="empty-state">
                 <strong>No finished games</strong>
-                Finish a game and it will appear here for this session.
+                Finish a game and it will be saved here.
             </div>
         ) : (
             <div className="history-grid">
@@ -29,7 +29,7 @@ export const HistoryList = ({ sessionGames, onViewGame }) => (
                         <div className="history-card" key={game.id}>
                             <div className="history-top">
                                 <div className="game-number">Game #{game.gameNumber}</div>
-                                <div className="history-time">{game.finishedAt}</div>
+                                <div className="history-time">{formatTime(game.finishedAt)}</div>
                             </div>
                             <div className="lineup">{game.players.join(' · ')}</div>
                             <div className="history-meta">

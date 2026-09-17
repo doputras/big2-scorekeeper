@@ -1,7 +1,7 @@
 import { BackIcon } from './Icons.jsx';
 import { ScoreboardTable } from './ScoreboardTable.jsx';
 import { SettlementList } from './SettlementList.jsx';
-import { formatValue } from '../utils/format.js';
+import { formatTime, formatValue } from '../utils/format.js';
 
 export const HistoryDetail = ({ viewingGame, onBack }) => {
     if (!viewingGame) return null;
@@ -17,7 +17,7 @@ export const HistoryDetail = ({ viewingGame, onBack }) => {
                     <div>
                         <div className="eyebrow">Archived match</div>
                         <div className="panel-title" style={{ fontSize: 20 }}>Game #{viewingGame.gameNumber}</div>
-                        <div className="panel-subtitle">{viewingGame.players.join(' · ')} · finished {viewingGame.finishedAt}</div>
+                        <div className="panel-subtitle">{viewingGame.players.join(' · ')} · finished {formatTime(viewingGame.finishedAt)}</div>
                     </div>
                     <div className="detail-settings">
                         <div className="detail-chip">
