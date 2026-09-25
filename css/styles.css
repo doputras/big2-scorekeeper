@@ -861,21 +861,6 @@ input::placeholder { color: #6f746d; }
 
 /* Full-bleed like its panel siblings, tinted in the modal-warning register so a
    blocked Finish reads as "resolve this", not as an error. */
-.tie-warning {
-  padding: 13px 20px;
-  border-top: 1px solid var(--line);
-  background: #211e16;
-  color: #cbbf9f;
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.tie-warning strong { display: block; color: var(--accent-strong); margin-bottom: 4px; }
-
-/* A boundary tie makes the cash split a coin flip, so it must not sit next to
-   the warning looking as settled as every other number on the board. */
-.cash-provisional .cash-row td { opacity: .45; }
-
 /* ---------- crash ---------- */
 
 .crash {
@@ -949,7 +934,6 @@ input::placeholder { color: #6f746d; }
   .actions,
   .score-footer,
   .settlement,
-  .tie-warning,
   .result-head,
   .result-winner,
   .result-actions,

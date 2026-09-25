@@ -1,6 +1,6 @@
 import { CheckIcon, ResetIcon, UndoIcon } from './Icons.jsx';
 import { ScoreboardTable } from './ScoreboardTable.jsx';
-import { formatList, formatValue } from '../utils/format.js';
+import { formatValue } from '../utils/format.js';
 import { clampSetValue } from '../utils/session.js';
 
 export const CurrentGame = ({
@@ -18,7 +18,6 @@ export const CurrentGame = ({
     currentTotals,
     currentCash,
     currentSettlement,
-    boundaryTie,
     onSaveOrUpdateRound,
     onCancelEdit,
     startEditingRound,
@@ -66,7 +65,7 @@ export const CurrentGame = ({
                             </div>
                             <div className="field">
                                 <div className="field-label">Value per point</div>
-                                <input className="number-input" type="number" min="0" inputMode="numeric" value={setValue} onChange={e => setSetValue(clampSetValue(e.target.value))} />
+                                <input className="number-input" type="number" min="0" inputMode="numeric" value={setValue || ''} placeholder="0" onChange={e => setSetValue(clampSetValue(e.target.value))} />
                             </div>
                         </>
                     ) : (
@@ -111,7 +110,7 @@ export const CurrentGame = ({
                 </div>
             </div>
 
-            <div className={`panel ${boundaryTie ? 'cash-provisional' : ''}`}>
+            <div className="panel">
                 <div className="panel-header">
                     <div>
                         <div className="panel-title">Scoreboard</div>
@@ -137,14 +136,6 @@ export const CurrentGame = ({
                     <span>Cash shown is the net result for the current game.</span>
                     <span>{rounds.length ? `${currentSettlement.length} settlement transfer${currentSettlement.length === 1 ? '' : 's'}` : 'No settlement yet'}</span>
                 </div>
-
-                {boundaryTie && (
-                    <div className="tie-warning" role="status">
-                        <strong>Tied across the Top 2 / Bottom 2 line</strong>
-                        {formatList(boundaryTie.players)} are level on {boundaryTie.points} points,
-                        so there is no fair way to split the table. Play a tiebreak round, or switch to Classic in settings.
-                    </div>
-                )}
 
                 <div className="panel-foot">
                     <button className="finish-btn" onClick={onFinishCurrentGame}>

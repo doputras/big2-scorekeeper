@@ -8,8 +8,8 @@ browser on the device that played them.
 
 - **Classic** — every player settles against every other player on point difference.
 - **Top 2 / Bottom 2** — the two lowest point totals are paid by the two highest.
-  If 2nd and 3rd place are level there is no fair way to draw that line, so the app
-  blocks Finish and asks for a tiebreak round or a switch to Classic.
+  If 2nd and 3rd place are level, the tied players are treated as sitting on both
+  sides of the line equally, so they always receive the same amount.
 
 Points are entered per round, negative meaning points gained. Value per point is a
 whole number; the app rejects negatives, which would invert every settlement.

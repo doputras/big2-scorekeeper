@@ -45,7 +45,10 @@ export const SettingsModal = ({ settingsModal, setSettingsModal, onApply }) => {
                         type="number"
                         min="0"
                         inputMode="numeric"
-                        value={settingsModal.tempValue}
+                        // An empty field stays empty: a controlled 0 here is what
+                        // turned typing "300" into "0300".
+                        value={settingsModal.tempValue || ''}
+                        placeholder="0"
                         onChange={e => setSettingsModal(s => ({ ...s, tempValue: clampSetValue(e.target.value) }))}
                     />
                 </div>

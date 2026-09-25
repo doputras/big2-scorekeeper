@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { calculateTotals, calculateCash, calculateSettlement, getBoundaryTie } from './utils/calculations.js';
+import { calculateTotals, calculateCash, calculateSettlement } from './utils/calculations.js';
 import { clampSetValue, DEFAULT_PLAYERS, getInitialSession, persistSession } from './utils/session.js';
-import { formatList } from './utils/format.js';
 import { ConfirmDialog } from './components/ConfirmDialog.jsx';
 import { SettingsModal } from './components/SettingsModal.jsx';
 import { CurrentGame } from './components/CurrentGame.jsx';
@@ -41,12 +40,6 @@ export const App = () => {
     const currentTotals = useMemo(() => calculateTotals(rounds), [rounds]);
     const currentCash = useMemo(() => calculateCash(currentTotals, isRankMode, setValue), [currentTotals, isRankMode, setValue]);
     const currentSettlement = useMemo(() => calculateSettlement(currentCash, players), [currentCash, players]);
-
-    // Only rank mode draws a top2/bottom2 line, so only rank mode can tie across it.
-    const boundaryTie = useMemo(
-        () => (isRankMode && rounds.length ? getBoundaryTie(currentTotals, players) : null),
-        [isRankMode, rounds.length, currentTotals, players]
-    );
 
     const handleCancelEdit = () => {
         setEditingIndex(null);
@@ -111,10 +104,6 @@ export const App = () => {
         }
         if (editingIndex !== null) {
             setErrorMsg('Save or cancel the round edit before finishing.');
-            return;
-        }
-        if (boundaryTie) {
-            setErrorMsg(`${formatList(boundaryTie.players)} are tied on ${boundaryTie.points} points across the Top 2 / Bottom 2 line. Play a tiebreak round, or switch to Classic in settings.`);
             return;
         }
 
@@ -241,7 +230,6 @@ export const App = () => {
                         currentTotals={currentTotals}
                         currentCash={currentCash}
                         currentSettlement={currentSettlement}
-                        boundaryTie={boundaryTie}
                         onSaveOrUpdateRound={handleSaveOrUpdateRound}
                         onCancelEdit={handleCancelEdit}
                         startEditingRound={startEditingRound}

@@ -5,41 +5,43 @@ export const calculateTotals = (rounds) => {
     ), [0, 0, 0, 0]);
 };
 
-export const calculateCash = (totals, isRankMode, setValue) => {
-    return totals.map((score, i) => {
-        let cashMultiplier = 0;
-        if (!isRankMode) {
-            const totalPointsSum = totals.reduce((sum, val) => sum + val, 0);
-            cashMultiplier = totalPointsSum - (totals.length * score);
-        } else {
-            const rankedPlayers = totals
-                .map((val, idx) => ({ val, idx }))
-                .sort((a, b) => a.val - b.val);
-            const top2 = rankedPlayers.slice(0, 2);
-            const bottom2 = rankedPlayers.slice(2, 4);
-            const topSum = top2.reduce((sum, p) => sum + p.val, 0);
-            const bottomSum = bottom2.reduce((sum, p) => sum + p.val, 0);
-            const isTop2 = top2.some(p => p.idx === i);
-            cashMultiplier = isTop2 ? bottomSum - (2 * score) : topSum - (2 * score);
-        }
-        // A negative multiplier times a zero setValue gives -0, which formats as
-        // the string "-0" in a money column. Normalise it away at the source.
-        const cash = cashMultiplier * setValue;
-        return cash === 0 ? 0 : cash;
-    });
+const SEATS = [0, 1, 2, 3];
+const TOP_PAIRS = [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]];
+
+// A player collects the point gap from every opponent they are scored against.
+const gapTo = (totals, i, opponents) => opponents.reduce((sum, j) => sum + totals[j] - totals[i], 0);
+
+// Averaged splits can land on a half or a third of a point. Round to whole
+// rupiah and give the dropped units to the largest remainders so the table
+// still sums to zero. ponytail: an uneven split's odd Rp1 goes to the lowest seat.
+const toWholeCash = (raw) => {
+    const cash = raw.map(Math.floor);
+    const leftover = -cash.reduce((a, b) => a + b, 0);
+    raw.map((v, i) => ({ i, rem: v - cash[i] }))
+        .sort((a, b) => b.rem - a.rem)
+        .slice(0, leftover)
+        .forEach(({ i }) => cash[i]++);
+    // Math.floor(-0) is -0, which formats as "-0" in a money column.
+    return cash.map(v => v === 0 ? 0 : v);
 };
 
-// Rank mode pays the two lowest point totals out of the two highest. When 2nd
-// and 3rd place are level there is no non-arbitrary way to draw that line --
-// the sort is stable, so seat order would silently decide who collects and who
-// pays. Surface it instead and let the table resolve it.
-export const getBoundaryTie = (totals, players) => {
-    const sorted = [...totals].sort((a, b) => a - b);
-    if (sorted[1] !== sorted[2]) return null;
-    return {
-        points: sorted[1],
-        players: players.filter((_, i) => totals[i] === sorted[1])
-    };
+// Classic scores everyone against everyone. Top 2 / Bottom 2 scores the two
+// lowest totals against the two highest only. Every top 2 where nobody outscores
+// anybody below the line is a legal split: without a tie on the 2nd/3rd line
+// there is exactly one, with a tie the tied players take turns on each side.
+// Averaging over the splits pays tied players the same, instead of letting the
+// stable sort's seat order pick who collects and who pays.
+export const calculateCash = (totals, isRankMode, setValue) => {
+    const splits = isRankMode
+        ? TOP_PAIRS.filter(top => SEATS.every(j => top.includes(j) || top.every(i => totals[i] <= totals[j])))
+        : [SEATS];
+    const opponentsOf = (i, top) => (
+        !isRankMode ? SEATS : top.includes(i) ? SEATS.filter(j => !top.includes(j)) : top
+    );
+    // Multiply before dividing so an exact result stays an exact integer.
+    return toWholeCash(SEATS.map(i => (
+        splits.reduce((sum, top) => sum + gapTo(totals, i, opponentsOf(i, top)), 0) * setValue / splits.length
+    )));
 };
 
 export const calculateSettlement = (cashArray, playersArray) => {
